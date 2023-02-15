@@ -11,7 +11,18 @@ namespace ConsoleAppLearnEFCore
     {
         static void Main(string[] args)
         {
-            using (ApplicationDbContext db = new ApplicationDbContext())
+            LibraryManager libraryManager = new LibraryManager();
+            libraryManager.ShowMenuLibrary();
+            libraryManager.ShowSectionLibrary();
+
+
+            Console.ReadLine();
+
+
+
+
+
+            /*using (ApplicationDbContext db = new ApplicationDbContext())
             {
                 // наполняем миграцию данными
                 var csharpBook = new Book
@@ -75,7 +86,7 @@ namespace ConsoleAppLearnEFCore
                 efCoreBook.BookSections.Add(sectionEducation);
                 
                 db.SaveChanges();
-            }
+            }*/
         }
 
         
