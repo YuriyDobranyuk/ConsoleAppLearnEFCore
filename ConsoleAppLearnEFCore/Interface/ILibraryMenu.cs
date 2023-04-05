@@ -2,6 +2,6 @@
 {
     public interface ILibraryMenu
     {
-        void ShowLibraryMenu();
+        Task ShowLibraryMenu();
     }
 }

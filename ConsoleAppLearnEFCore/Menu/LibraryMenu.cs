@@ -1,15 +1,36 @@
 ﻿using ConsoleAppLearnEFCore.Interface;
 using ConsoleAppLearnEFCore.Manager;
+using ConsoleAppLearnEFCore.Model;
+using Microsoft.AspNetCore.Components;
+//using static System.Net.Mime.MediaTypeNames;
 
 namespace ConsoleAppLearnEFCore.Menu
 {
     public class LibraryMenu : BaseMenu, ILibraryMenu
     {
-        public LibraryMenu(IServiceLibrary serviceLibrary, ILibraryMenu libraryMenu, ISectionMenu sectionMenu) : base(serviceLibrary, libraryMenu, sectionMenu)
+        public SectionMenu SectionMenu { get; set; }
+        public BookMenu BookMenu { get; set; }
+        public AuthorMenu AuthorMenu { get; set; }
+        
+        public LibraryMenu(IServiceLibrary serviceLibrary)
         {
+            BookMenu = new BookMenu(serviceLibrary)
+            {
+                BackToLibraryMenu = EventCallback.Factory.Create(this, () => ShowLibraryMenu())
+            };
+            SectionMenu = new SectionMenu(serviceLibrary)
+            {
+                BackToLibraryMenu = EventCallback.Factory.Create(this, () => ShowLibraryMenu()),
+                //BackToChooseBooks = EventCallback.Factory.Create(this, (List<Book> books) => BookMenu.ChooseBooks(books))
+            };
+            
+            BookMenu = new BookMenu(serviceLibrary)
+            {
+                BackToLibraryMenu = EventCallback.Factory.Create(this, () => ShowLibraryMenu())
+            };
         }
 
-        public void ShowLibraryMenu()
+        public async Task ShowLibraryMenu()
         {
             Console.Clear();
             DisplayTitle("Menu library:");
@@ -25,19 +46,17 @@ namespace ConsoleAppLearnEFCore.Menu
                     Environment.Exit(1);
                     break;
                 case 1:
-                    _sectionMenu.ShowMenuSectionLibrary();
+                    await SectionMenu.ShowMenuSectionLibrary();
                     break;
-                /*case 2:
-                    BookManager.ShowMenuBookLibrary();
+                case 2:
+                    BookMenu.ShowMenuBookLibrary();
                     break;
-                case 3:
+                /*case 3:
                     AuthorManager.ShowMenuAuthorLibrary();
                     break;*/
             }
-            Console.WriteLine();
-            Console.WriteLine("For continue enter key \"enter\"");
-            Console.ReadLine();
-            if (selection != 0) ShowLibraryMenu();
+            EnterKeyForContinueWork();
+            if (selection != 0) await ShowLibraryMenu();
         }
     }
 }

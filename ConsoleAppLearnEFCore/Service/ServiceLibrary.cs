@@ -25,9 +25,16 @@ namespace ConsoleAppLearnEFCore.Service
             await _libraryDbContext.Set<T>().AddAsync(entity);
             _libraryDbContext.SaveChanges();
         }
+
         public void Delete<T>(T entity) where T : class
         {
             _libraryDbContext.Set<T>().Remove(entity);
+            _libraryDbContext.SaveChanges();
+        }
+
+        public void Update<T>(T entity) where T : class
+        {
+            _libraryDbContext.Set<T>().Update(entity);
             _libraryDbContext.SaveChanges();
         }
 
@@ -35,14 +42,14 @@ namespace ConsoleAppLearnEFCore.Service
         {
             IQueryable<T> query = _libraryDbContext.Set<T>();
 
-            if(predicate != null) query.Where(predicate);
-
+            //if(predicate != null) query.Where<T>(predicate);
+            
             foreach (var include in includes)
             {
                 query = query.Include(include);
             }
-            return query.FirstOrDefault();
-            //return query.First(predicate);
+            //return query.FirstOrDefault();
+            return query.FirstOrDefault(predicate);
         }
         public async Task<IList<T>> GetAllItems<T>(params Expression<Func<T, object>>[] includes) where T : class
         {

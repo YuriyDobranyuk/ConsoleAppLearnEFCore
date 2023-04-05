@@ -1,5 +1,12 @@
 ﻿using ConsoleAppLearnEFCore.Interface;
+using ConsoleAppLearnEFCore.Manager;
 using ConsoleAppLearnEFCore.Model;
+using Microsoft.AspNetCore.Components;
+using System.Collections.Generic;
+using static System.Collections.Specialized.BitVector32;
+using static System.Net.Mime.MediaTypeNames;
+using static System.Reflection.Metadata.BlobBuilder;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 using Section = ConsoleAppLearnEFCore.Model.Section;
 
 
@@ -7,11 +14,22 @@ namespace ConsoleAppLearnEFCore.Menu
 {
     public class SectionMenu : BaseMenu, ISectionMenu
     {
-        public SectionMenu(IServiceLibrary serviceLibrary, ILibraryMenu libraryMenu, ISectionMenu sectionMenu) : base(serviceLibrary, libraryMenu, sectionMenu)
-        {
-        }
+        private string _enterNameSection;
+        private IList<Section> _sectionsLibrary;
+        private int _countSections;
+        private Section? _findedSectionLibrary;
 
-        public void ShowMenuSectionLibrary()
+        public EventCallback BackToLibraryMenu { get; set; }
+        public BookMenu BookMenu { get; set; }
+
+        //public EventCallback<List<Book>> BackToChooseBooks { get; set; }
+
+        public SectionMenu(IServiceLibrary serviceLibrary) : base(serviceLibrary)
+        {
+            BookMenu = new BookMenu(serviceLibrary);
+        }
+        
+        public async Task ShowMenuSectionLibrary()
         {
             Console.Clear();
             DisplayTitle("Menu library sections:");
@@ -25,40 +43,40 @@ namespace ConsoleAppLearnEFCore.Menu
             switch (selection)
             {
                 case 0:
-                    _libraryMenu.ShowLibraryMenu();
+                    await BackToLibraryMenu.InvokeAsync();
                     break;
                 case 1:
                     ShowAllSectionsLibrary();
                     break;
                 case 2:
-                    ShowSearchSectionLibrary();
+                    SearchSectionLibraryByName();
                     break;
                 case 3:
-                    ShowOrAddSectionLibrary();
+                    AddSectionToLibrary();
                     break;
                 case 4:
-                    //_sectionService.EditSection();
+                    EditSectionLibrary();
                     break;
                 case 5:
-                    //_sectionService.EditSection();
+                    DeleteSectionWithLibrary();
                     break;
             }
-            Console.WriteLine("For continue enter key \"enter\"");
-            Console.ReadLine();
+            EnterKeyForContinueWork();
             if (selection != 0) ShowMenuSectionLibrary();
         }
 
         private void ShowAllSectionsLibrary()
         {
-            var sections = _serviceLibrary.GetAllItems<Section>(x => x.BookSections).Result;
             var books = _serviceLibrary.GetAllItems<Book>(x => x.BookSections, x => x.BookAuthors).Result;
-            
+            _sectionsLibrary = _serviceLibrary.GetAllItems<Section>(x => x.BookSections).Result;
+            _countSections = _sectionsLibrary.Count;
+                        
             Console.WriteLine($"Sections library:");
-            Console.WriteLine($"Count sections: {sections.Count}");
-            if (sections.Count > 0)
+            Console.WriteLine($"Count sections: {_countSections}");
+            if (_countSections > 0)
             {
                 var i = 1;
-                foreach (var section in sections)
+                foreach (var section in _sectionsLibrary)
                 {
                     ShowSectionLibrary(section, i);
                     i++;
@@ -108,48 +126,137 @@ namespace ConsoleAppLearnEFCore.Menu
             }
         }
 
-        private string EnterSectionProperty(string property, bool required)
+        private void SearchSectionLibraryByName()
         {
-            Console.WriteLine(new string('_', 10));
-            Console.WriteLine($"Enter {property} section, please:");
-            var enterName = Console.ReadLine();
-            if (string.IsNullOrEmpty(enterName) && required) EnterSectionProperty(property, required);
-            return enterName;
+            _enterNameSection = EnterPropertyValue("name", "section", true);
+            _findedSectionLibrary = GetSectionByName();
+            ShowResultSearchSectionLibrary();
         }
 
-        private void ShowOrAddSectionLibrary()
+        private Section GetSectionByName()
         {
-            var section = new Section()
-            {
-                Name = EnterSectionProperty("name", true),
-                Description = EnterSectionProperty("description", true),
-                //BookSections = BookService.ChooseBooks()
-            };
+            return _serviceLibrary.Get<Section>(x => x.Name == _enterNameSection, x => x.BookSections);
+        }
 
-            if (!_serviceLibrary.CheckExistByName<Section>(x => x.Name == section.Name, x => x.BookSections))
+        public void ShowResultSearchSectionLibrary()
+        {
+            Console.WriteLine($"Search section in library by name \"{_enterNameSection}\":");
+            if (_findedBook == null)
             {
-                _serviceLibrary.Add<Section>(section);
+                Console.WriteLine($"We not find section by name \"{_enterNameSection}\" in our library.");
+            }
+            ShowSectionLibrary(_findedSectionLibrary);
+        }
+
+        private void AddSectionToLibrary()
+        {
+            _enterNameSection = EnterPropertyValue("name", "section", true);
+            _findedSectionLibrary = GetSectionByName();
+            var checkExitSection = _serviceLibrary.CheckExist<Section>(_findedSectionLibrary);
+
+            if (!checkExitSection)
+            {
+                _serviceLibrary.Add<Section>(FormingSection());
+                Console.WriteLine($"You are add new section with name \"{_enterNameSection}\" in our library.");
             }
             else
             {
-                Console.WriteLine($"Section on name \"{section.Name}\" is exist in our library.");
+                Console.WriteLine($"Section on name \"{_enterNameSection}\" is exist in our library.");
+                ShowSectionLibrary(_findedSectionLibrary);
             }
         }
 
-        private void ShowSearchSectionLibrary()
+        private Section FormingSection()
         {
-            var sectionName = EnterSectionProperty("name", true);
-            var section = _serviceLibrary.Get<Section>(x => x.Name == sectionName, x => x.BookSections);
-            Console.WriteLine($"Search section library by name \"{sectionName}\":");
-            if (section == null)
+            var section = new Section()
             {
-                Console.WriteLine($"We not find section library by name \"{sectionName}\" in our library.");
-            }
-            ShowSectionLibrary(section);
+                Name = EnterPropertyValue("name", "section", true),
+                Description = EnterPropertyValue("description", "section", true),
+            };
+            List<Book> booksForSectionLibrary = GetBooksForAddToSectionLibrary();
+            if (booksForSectionLibrary != null) section.BookSections.AddRange(booksForSectionLibrary);
+            return section;
         }
 
+        private List<Book> GetBooksForAddToSectionLibrary()
+        {
+            var allBook = new List<Book>();
+            Console.WriteLine($"For create or select books for library`s section, enter number 1.");
+            Console.WriteLine($"For end create and select books, enter anywhere key.");
+            for (int i = 1; i == 1; i = GetUserSelection())
+            {
+                allBook.AddRange(FormingBooksToSectionLibrary());
+            }
+            return allBook;
+        }
+        private List<Book> FormingBooksToSectionLibrary()
+        {
+            var books = new List<Book>();
+            Console.WriteLine($"For create new books and add to library`s section, enter number 1.");
+            Console.WriteLine($"For select books for add to library`s section, enter number 2.");
+            Console.WriteLine($"For not add books to library`s section, enter anywhere key.");
+            var selection = GetUserSelection();
+            switch (selection)
+            {
+                case 1:
+                    books = AddNewBooksToLibrary();
+                    break;
+                case 2:
+                    books = SelectBooksToSectionLibrary();
+                    break;
+            }
+            return books;
+        }
         
+        private List<Book> AddNewBooksToLibrary()
+        {
+            var books = new List<Book>();
+            for (int i = 1; i == 1; i = GetUserSelection())
+            {
+                books.Add(BookMenu.AddBookToLibrary());
+            }
+            return books;
+        }
+        
+        private List<Book> SelectBooksToSectionLibrary()
+        {
+            return BookMenu.SelectBooks();
+        }
 
-        
+        public void EditSectionLibrary()
+        {
+            SearchSectionLibraryByName();
+            if (_findedSectionLibrary != null)
+            {
+                FormingSectionLibraryForEdit();
+                _serviceLibrary.Update<Section>(_findedSectionLibrary); 
+            }
+        }
+
+        private Section FormingSectionLibraryForEdit()
+        {
+            if (ChooseEditOrNotParams("Name"))
+            {
+                _findedSectionLibrary.Name = EnterPropertyValue("name", "book", true);
+            }
+            if (ChooseEditOrNotParams("Description"))
+            {
+                _findedSectionLibrary.Description = EnterPropertyValue("description", "book", true);
+            }
+            if (ChooseEditOrNotParams("Books section"))
+            {
+                List<Book> booksForSectionLibrary = GetBooksForAddToSectionLibrary();
+                if (booksForSectionLibrary != null) _findedSectionLibrary.BookSections.AddRange(booksForSectionLibrary);
+            }
+            return _findedSectionLibrary;
+        }
+
+        private void DeleteSectionWithLibrary()
+        {
+            SearchSectionLibraryByName();
+            var confirmDelete = ConfirmDeleteItem("section");
+            if (confirmDelete) _serviceLibrary.Delete(_findedSectionLibrary);
+        }
+
     }
 }

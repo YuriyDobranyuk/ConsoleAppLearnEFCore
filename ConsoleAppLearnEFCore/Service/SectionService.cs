@@ -2,15 +2,13 @@
 using Microsoft.EntityFrameworkCore;
 using System.Xml.Linq;
 using ConsoleAppLearnEFCore.Model;
+using Microsoft.AspNetCore.Components;
 //using SectionLibrary = ConsoleAppLearnEFCore.Model.Section;
 
 namespace ConsoleAppLearnEFCore.Service
 {
     public class SectionService : BaseService
     {
-        
-        //public SectionService() { }
-
         public void Add(Section element)
         {
             if (element != null)

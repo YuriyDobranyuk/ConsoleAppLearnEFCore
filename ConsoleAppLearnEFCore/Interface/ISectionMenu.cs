@@ -2,6 +2,6 @@
 {
     public interface ISectionMenu
     {
-        void ShowMenuSectionLibrary();
+        Task ShowMenuSectionLibrary();
     }
 }

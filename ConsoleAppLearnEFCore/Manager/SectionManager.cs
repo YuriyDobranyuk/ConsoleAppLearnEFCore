@@ -5,6 +5,7 @@ namespace ConsoleAppLearnEFCore.Manager
 {
     public class SectionManager
     {
+
         ApplicationDbContext dataBaseLibrary = new ApplicationDbContext();
        
         int countSections;
