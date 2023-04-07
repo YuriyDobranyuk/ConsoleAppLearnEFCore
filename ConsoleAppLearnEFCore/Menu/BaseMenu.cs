@@ -61,7 +61,7 @@ namespace ConsoleAppLearnEFCore.Menu
             Console.WriteLine(new string('*', 10));
             Console.WriteLine($"Enter {nameParam}, please:");
             var value = 0;
-            if (!int.TryParse(Console.ReadLine(), out value) && value > 0) EnterIntPropertyValue(nameParam);
+            if (!(int.TryParse(Console.ReadLine(), out value) && value > 0)) EnterIntPropertyValue(nameParam);
             return value;
         }
 

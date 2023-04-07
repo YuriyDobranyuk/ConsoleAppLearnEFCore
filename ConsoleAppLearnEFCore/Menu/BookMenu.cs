@@ -249,17 +249,17 @@ namespace ConsoleAppLearnEFCore.Menu
             }
             if (ChooseEditOrNotParams("Year"))
             {
-                _findedBook.Year = EnterIntPropertyValue("year", "book", true);
+                _findedBook.Year = EnterIntPropertyValue("year");
             }
             if (ChooseEditOrNotParams("Pages"))
             {
-                _findedBook.Pages = EnterIntPropertyValue("count pages", "book", true);
+                _findedBook.Pages = EnterIntPropertyValue("count pages");
             }
             
             if (ChooseEditOrNotParams("Authors section"))
             {
                 var authorsForBook = GetAuthorsForAddToBook();
-                if (authorsForBook != null) book.BookAuthors.AddRange(authorsForBook);
+                if (authorsForBook != null) _findedBook.BookAuthors.AddRange(authorsForBook);
             }
             return _findedBook;
         }

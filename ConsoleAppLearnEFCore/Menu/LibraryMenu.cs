@@ -14,17 +14,18 @@ namespace ConsoleAppLearnEFCore.Menu
         
         public LibraryMenu(IServiceLibrary serviceLibrary)
         {
-            BookMenu = new BookMenu(serviceLibrary)
-            {
-                BackToLibraryMenu = EventCallback.Factory.Create(this, () => ShowLibraryMenu())
-            };
             SectionMenu = new SectionMenu(serviceLibrary)
             {
                 BackToLibraryMenu = EventCallback.Factory.Create(this, () => ShowLibraryMenu()),
                 //BackToChooseBooks = EventCallback.Factory.Create(this, (List<Book> books) => BookMenu.ChooseBooks(books))
             };
-            
+
             BookMenu = new BookMenu(serviceLibrary)
+            {
+                BackToLibraryMenu = EventCallback.Factory.Create(this, () => ShowLibraryMenu())
+            };
+
+            AuthorMenu = new AuthorMenu(serviceLibrary)
             {
                 BackToLibraryMenu = EventCallback.Factory.Create(this, () => ShowLibraryMenu())
             };
@@ -51,9 +52,9 @@ namespace ConsoleAppLearnEFCore.Menu
                 case 2:
                     BookMenu.ShowMenuBookLibrary();
                     break;
-                /*case 3:
-                    AuthorManager.ShowMenuAuthorLibrary();
-                    break;*/
+                case 3:
+                    AuthorMenu.ShowMenuAuthor();
+                    break;
             }
             EnterKeyForContinueWork();
             if (selection != 0) await ShowLibraryMenu();
