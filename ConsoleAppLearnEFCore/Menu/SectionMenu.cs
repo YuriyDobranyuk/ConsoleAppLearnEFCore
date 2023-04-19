@@ -141,7 +141,7 @@ namespace ConsoleAppLearnEFCore.Menu
         public void ShowResultSearchSectionLibrary()
         {
             Console.WriteLine($"Search section in library by name \"{_enterNameSection}\":");
-            if (_findedBook == null)
+            if (_findedSectionLibrary == null)
             {
                 Console.WriteLine($"We not find section by name \"{_enterNameSection}\" in our library.");
             }
@@ -170,7 +170,7 @@ namespace ConsoleAppLearnEFCore.Menu
         {
             var section = new Section()
             {
-                Name = EnterPropertyValue("name", "section", true),
+                Name = _enterNameSection,
                 Description = EnterPropertyValue("description", "section", true),
             };
             List<Book> booksForSectionLibrary = GetBooksForAddToSectionLibrary();
@@ -181,11 +181,12 @@ namespace ConsoleAppLearnEFCore.Menu
         private List<Book> GetBooksForAddToSectionLibrary()
         {
             var allBook = new List<Book>();
-            Console.WriteLine($"For create or select books for library`s section, enter number 1.");
-            Console.WriteLine($"For end create and select books, enter anywhere key.");
             for (int i = 1; i == 1; i = GetUserSelection())
             {
                 allBook.AddRange(FormingBooksToSectionLibrary());
+                Console.WriteLine($"For create or select books for library`s section, enter number 1.");
+                Console.WriteLine($"For end create and select books, enter anywhere key.");
+                Console.WriteLine();
             }
             return allBook;
         }

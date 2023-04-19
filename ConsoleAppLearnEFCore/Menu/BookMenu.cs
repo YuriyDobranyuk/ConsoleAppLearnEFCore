@@ -21,10 +21,6 @@ namespace ConsoleAppLearnEFCore.Menu
 
         public BookMenu(IServiceLibrary serviceLibrary) : base(serviceLibrary)
         {
-            /*SectionMenu = new SectionMenu(serviceLibrary)
-            {
-                //BackToChooseBooks = EventCallback.Factory.Create(this, (List<Book> books) => ChooseBooks(books))
-            };*/
             AuthorMenu = new AuthorMenu(serviceLibrary);
         }
         
@@ -160,7 +156,7 @@ namespace ConsoleAppLearnEFCore.Menu
             }
             else
             {
-                Console.WriteLine($"Section on name \"{_enterNameBook}\" is exist in our library.");
+                Console.WriteLine($"Book on name \"{_enterNameBook}\" is exist in our library.");
                 addedBook = _findedBook;
             }
             ShowBookLibrary(addedBook);
@@ -171,7 +167,7 @@ namespace ConsoleAppLearnEFCore.Menu
         {
             var book = new Book()
             {
-                Name = EnterPropertyValue("name", "book", true),
+                Name = _enterNameBook,
                 Description = EnterPropertyValue("description", "book", true),
                 Year = EnterIntPropertyValue("book publication year"),
                 Pages = EnterIntPropertyValue("count book`s pages")
@@ -181,7 +177,7 @@ namespace ConsoleAppLearnEFCore.Menu
             return book;
         }
 
-        private List<Book> GetAuthorsForAddToBook()
+        private List<Author> GetAuthorsForAddToBook()
         {
             var allAuthors = new List<Author>();
             Console.WriteLine($"For create or select authors for book, enter number 1.");
@@ -206,7 +202,7 @@ namespace ConsoleAppLearnEFCore.Menu
                     authors = AddNewAuthorsToLibrary();
                     break;
                 case 2:
-                    authors = SelectAuthorsToSectionLibrary();
+                    authors = SelectAuthorsToBook();
                     break;
             }
             return authors;

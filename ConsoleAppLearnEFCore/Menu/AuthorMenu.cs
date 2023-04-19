@@ -44,13 +44,13 @@ namespace ConsoleAppLearnEFCore.Menu
                     SearchAuthorLibraryByNames();
                     break;
                 case 3:
-                    //AddBookToLibrary();
+                    AddAuthorToLibrary();
                     break;
                 case 4:
-                    //EditBook();
+                    EditAuthor();
                     break;
                 case 5:
-                    //DeleteBookWithLibrary();
+                    DeleteAuthorWithLibrary();
                     break;
             }
             EnterKeyForContinueWork();
@@ -151,9 +151,82 @@ namespace ConsoleAppLearnEFCore.Menu
             ShowAuthorLibrary(_findedAuthor);
         }
 
+        public Author AddAuthorToLibrary()
+        {
+            Author addedAuthor;
+            _enterLastName = EnterPropertyValue("LastName", "author", true);
+            _enterFirstName = EnterPropertyValue("FirstName", "author", true);
+            _findedAuthor = GetAuthorByName();
+            var checkExitBook = _serviceLibrary.CheckExist<Author>(_findedAuthor);
 
+            if (!checkExitBook)
+            {
+                _serviceLibrary.Add<Author>(FormingAuthor());
+                addedAuthor = GetAuthorByName();
+                Console.WriteLine($"You are add new author with lastname \"{_enterLastName}\" and firstname \"{_enterFirstName}\" in our library.");
+            }
+            else
+            {
+                Console.WriteLine($"Author by lastname \"{_enterLastName}\" and firstname \"{_enterFirstName}\" is exist in our library.");
+                addedAuthor = _findedAuthor;
+            }
+            ShowAuthorLibrary(addedAuthor);
+            return addedAuthor;
+        }
 
+        private Author FormingAuthor()
+        {
+            return new Author()
+            {
+                FirstName = _enterFirstName,
+                LastName = _enterLastName
+            };
+        }
 
+        public void EditAuthor()
+        {
+            SearchAuthorLibraryByNames();
+            if (_findedAuthor != null)
+            {
+                FormingAuthorForEdit();
+                _serviceLibrary.Update<Author>(_findedAuthor);
+            }
+        }
+
+        private Author FormingAuthorForEdit()
+        {
+            if (ChooseEditOrNotParams("LastName"))
+            {
+                _findedAuthor.FirstName = EnterPropertyValue("LastName", "author", true);
+            }
+            if (ChooseEditOrNotParams("FirstName"))
+            {
+                _findedAuthor.FirstName = EnterPropertyValue("FirstName", "author", true);
+            }
+            return _findedAuthor;
+        }
+
+        private void DeleteAuthorWithLibrary()
+        {
+            SearchAuthorLibraryByNames();
+            var confirmDelete = ConfirmDeleteItem("author");
+            if (confirmDelete) _serviceLibrary.Delete<Author>(_findedAuthor);
+        }
+
+        public List<Author> SelectAuthors()
+        {
+            ShowAllAuthorsLibrary();
+            var authors = GetSelectAuthors();
+            return authors;
+        }
+
+        private List<Author> GetSelectAuthors()
+        {
+            var choosePositionBooks = ChoosePosition("author");
+            var positions = MakeListPositions(choosePositionBooks, _countAuthors);
+            var authors = MakeListChooses<Author>(positions, _authors);
+            return authors;
+        }
 
     }
 }
