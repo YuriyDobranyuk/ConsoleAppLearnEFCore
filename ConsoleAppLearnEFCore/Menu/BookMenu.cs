@@ -1,10 +1,6 @@
 ﻿using ConsoleAppLearnEFCore.Interface;
-using ConsoleAppLearnEFCore.Manager;
 using ConsoleAppLearnEFCore.Model;
 using Microsoft.AspNetCore.Components;
-using System.Security.AccessControl;
-using static System.Collections.Specialized.BitVector32;
-using static System.Reflection.Metadata.BlobBuilder;
 
 namespace ConsoleAppLearnEFCore.Menu
 {
@@ -173,20 +169,23 @@ namespace ConsoleAppLearnEFCore.Menu
                 Pages = EnterIntPropertyValue("count book`s pages")
             };
             var authorsForBook = GetAuthorsForAddToBook();
-            if (authorsForBook != null) book.BookAuthors.AddRange(authorsForBook);
+            if (authorsForBook != null)
+            { 
+                book.BookAuthors.AddRange(authorsForBook);
+            }
             return book;
         }
 
         private List<Author> GetAuthorsForAddToBook()
         {
             var allAuthors = new List<Author>();
-            Console.WriteLine($"For create or select authors for book, enter number 1.");
-            Console.WriteLine($"For end create and select authors, enter anywhere key.");
             for (int i = 1; i == 1; i = GetUserSelection())
             {
                 allAuthors.AddRange(FormingAuthorsToBook());
+                Console.WriteLine($"For create or select authors for book, enter number 1.");
+                Console.WriteLine($"For end create and select authors, enter anywhere number key.");
             }
-            return allAuthors;
+            return allAuthors.Distinct<Author>().ToList();
         }
         
         private List<Author> FormingAuthorsToBook()
@@ -194,7 +193,7 @@ namespace ConsoleAppLearnEFCore.Menu
             var authors = new List<Author>();
             Console.WriteLine($"For create new authors and add to book, enter number 1.");
             Console.WriteLine($"For select authors for add to book, enter number 2.");
-            Console.WriteLine($"For not add authors to book, enter anywhere key.");
+            Console.WriteLine($"For not add authors to book, enter anywhere number key.");
             var selection = GetUserSelection();
             switch (selection)
             {
@@ -214,6 +213,8 @@ namespace ConsoleAppLearnEFCore.Menu
             for (int i = 1; i == 1; i = GetUserSelection())
             {
                 authors.Add(AuthorMenu.AddAuthorToLibrary());
+                Console.WriteLine($"For create new author for book, enter number 1.");
+                Console.WriteLine($"For end create author, enter anywhere number key.");
             }
             return authors;
         }
@@ -230,6 +231,7 @@ namespace ConsoleAppLearnEFCore.Menu
             {
                 FormingBookForEdit();
                 _serviceLibrary.Update<Book>(_findedBook);
+                ShowBookLibrary(_findedBook);
             }
         }
 
@@ -255,7 +257,11 @@ namespace ConsoleAppLearnEFCore.Menu
             if (ChooseEditOrNotParams("Authors section"))
             {
                 var authorsForBook = GetAuthorsForAddToBook();
-                if (authorsForBook != null) _findedBook.BookAuthors.AddRange(authorsForBook);
+                if (authorsForBook != null)
+                {
+                    _findedBook.BookAuthors.Clear();
+                    _findedBook.BookAuthors.AddRange(authorsForBook);
+                }
             }
             return _findedBook;
         }

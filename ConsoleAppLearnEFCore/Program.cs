@@ -1,8 +1,6 @@
 ﻿using ConsoleAppLearnEFCore.Interface;
-using ConsoleAppLearnEFCore.Manager;
 using ConsoleAppLearnEFCore.Menu;
 using ConsoleAppLearnEFCore.Service;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ConsoleAppLearnEFCore

@@ -1,14 +1,7 @@
 ﻿using ConsoleAppLearnEFCore.Interface;
-using ConsoleAppLearnEFCore.Manager;
 using ConsoleAppLearnEFCore.Model;
 using Microsoft.AspNetCore.Components;
-using System.Collections.Generic;
-using static System.Collections.Specialized.BitVector32;
-using static System.Net.Mime.MediaTypeNames;
-using static System.Reflection.Metadata.BlobBuilder;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 using Section = ConsoleAppLearnEFCore.Model.Section;
-
 
 namespace ConsoleAppLearnEFCore.Menu
 {
@@ -20,13 +13,13 @@ namespace ConsoleAppLearnEFCore.Menu
         private Section? _findedSectionLibrary;
 
         public EventCallback BackToLibraryMenu { get; set; }
-        public BookMenu BookMenu { get; set; }
 
-        //public EventCallback<List<Book>> BackToChooseBooks { get; set; }
+        public BookMenu BookMenu { get; set; }
 
         public SectionMenu(IServiceLibrary serviceLibrary) : base(serviceLibrary)
         {
             BookMenu = new BookMenu(serviceLibrary);
+            var books = _serviceLibrary.GetAllItems<Book>(x => x.BookSections, x => x.BookAuthors).Result;
         }
         
         public async Task ShowMenuSectionLibrary()
@@ -67,7 +60,6 @@ namespace ConsoleAppLearnEFCore.Menu
 
         private void ShowAllSectionsLibrary()
         {
-            var books = _serviceLibrary.GetAllItems<Book>(x => x.BookSections, x => x.BookAuthors).Result;
             _sectionsLibrary = _serviceLibrary.GetAllItems<Section>(x => x.BookSections).Result;
             _countSections = _sectionsLibrary.Count;
                         
@@ -162,8 +154,8 @@ namespace ConsoleAppLearnEFCore.Menu
             else
             {
                 Console.WriteLine($"Section on name \"{_enterNameSection}\" is exist in our library.");
-                ShowSectionLibrary(_findedSectionLibrary);
             }
+            ShowSectionLibrary(_findedSectionLibrary);
         }
 
         private Section FormingSection()
@@ -174,7 +166,10 @@ namespace ConsoleAppLearnEFCore.Menu
                 Description = EnterPropertyValue("description", "section", true),
             };
             List<Book> booksForSectionLibrary = GetBooksForAddToSectionLibrary();
-            if (booksForSectionLibrary != null) section.BookSections.AddRange(booksForSectionLibrary);
+            if (booksForSectionLibrary != null) 
+            {
+                section.BookSections.AddRange(booksForSectionLibrary);
+            } 
             return section;
         }
 
@@ -185,17 +180,17 @@ namespace ConsoleAppLearnEFCore.Menu
             {
                 allBook.AddRange(FormingBooksToSectionLibrary());
                 Console.WriteLine($"For create or select books for library`s section, enter number 1.");
-                Console.WriteLine($"For end create and select books, enter anywhere key.");
+                Console.WriteLine($"For end create and select books, enter anywhere number key.");
                 Console.WriteLine();
             }
-            return allBook;
+            return allBook.Distinct<Book>().ToList();
         }
         private List<Book> FormingBooksToSectionLibrary()
         {
             var books = new List<Book>();
             Console.WriteLine($"For create new books and add to library`s section, enter number 1.");
             Console.WriteLine($"For select books for add to library`s section, enter number 2.");
-            Console.WriteLine($"For not add books to library`s section, enter anywhere key.");
+            Console.WriteLine($"For not add books to library`s section, enter anywhere number key.");
             var selection = GetUserSelection();
             switch (selection)
             {
@@ -215,6 +210,8 @@ namespace ConsoleAppLearnEFCore.Menu
             for (int i = 1; i == 1; i = GetUserSelection())
             {
                 books.Add(BookMenu.AddBookToLibrary());
+                Console.WriteLine($"For create book for library`s section, enter number 1.");
+                Console.WriteLine($"For end create book, enter anywhere number key.");
             }
             return books;
         }
@@ -230,7 +227,8 @@ namespace ConsoleAppLearnEFCore.Menu
             if (_findedSectionLibrary != null)
             {
                 FormingSectionLibraryForEdit();
-                _serviceLibrary.Update<Section>(_findedSectionLibrary); 
+                _serviceLibrary.Update<Section>(_findedSectionLibrary);
+                ShowSectionLibrary(_findedSectionLibrary);
             }
         }
 
@@ -247,7 +245,11 @@ namespace ConsoleAppLearnEFCore.Menu
             if (ChooseEditOrNotParams("Books section"))
             {
                 List<Book> booksForSectionLibrary = GetBooksForAddToSectionLibrary();
-                if (booksForSectionLibrary != null) _findedSectionLibrary.BookSections.AddRange(booksForSectionLibrary);
+                if (booksForSectionLibrary != null)
+                {
+                    _findedSectionLibrary.BookSections.Clear();
+                    _findedSectionLibrary.BookSections.AddRange(booksForSectionLibrary);
+                }
             }
             return _findedSectionLibrary;
         }

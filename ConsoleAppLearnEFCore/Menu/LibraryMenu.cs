@@ -1,8 +1,5 @@
 ﻿using ConsoleAppLearnEFCore.Interface;
-using ConsoleAppLearnEFCore.Manager;
-using ConsoleAppLearnEFCore.Model;
 using Microsoft.AspNetCore.Components;
-//using static System.Net.Mime.MediaTypeNames;
 
 namespace ConsoleAppLearnEFCore.Menu
 {
@@ -17,7 +14,6 @@ namespace ConsoleAppLearnEFCore.Menu
             SectionMenu = new SectionMenu(serviceLibrary)
             {
                 BackToLibraryMenu = EventCallback.Factory.Create(this, () => ShowLibraryMenu()),
-                //BackToChooseBooks = EventCallback.Factory.Create(this, (List<Book> books) => BookMenu.ChooseBooks(books))
             };
 
             BookMenu = new BookMenu(serviceLibrary)
@@ -50,10 +46,10 @@ namespace ConsoleAppLearnEFCore.Menu
                     await SectionMenu.ShowMenuSectionLibrary();
                     break;
                 case 2:
-                    BookMenu.ShowMenuBookLibrary();
+                    await BookMenu.ShowMenuBookLibrary();
                     break;
                 case 3:
-                    AuthorMenu.ShowMenuAuthor();
+                    await AuthorMenu.ShowMenuAuthor();
                     break;
             }
             EnterKeyForContinueWork();

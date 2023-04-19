@@ -1,5 +1,4 @@
 ﻿using ConsoleAppLearnEFCore.Interface;
-using ConsoleAppLearnEFCore.Model;
 
 namespace ConsoleAppLearnEFCore.Menu
 {
@@ -108,12 +107,5 @@ namespace ConsoleAppLearnEFCore.Menu
             return isEdit;
         }
         
-
-
-
-
-
-
-
     }
 }

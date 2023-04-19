@@ -1,11 +1,6 @@
 ﻿using ConsoleAppLearnEFCore.Interface;
 using ConsoleAppLearnEFCore.Model;
 using Microsoft.AspNetCore.Components;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ConsoleAppLearnEFCore.Menu
 {
@@ -18,7 +13,10 @@ namespace ConsoleAppLearnEFCore.Menu
         private Author? _findedAuthor;
 
         public EventCallback BackToLibraryMenu { get; set; }
-        public AuthorMenu(IServiceLibrary serviceLibrary) : base(serviceLibrary) { }
+        public AuthorMenu(IServiceLibrary serviceLibrary) : base(serviceLibrary) 
+        {
+            var _sections = _serviceLibrary.GetAllItems<Section>(x => x.BookSections).Result;
+        }
 
 
         public async Task ShowMenuAuthor()
@@ -54,7 +52,7 @@ namespace ConsoleAppLearnEFCore.Menu
                     break;
             }
             EnterKeyForContinueWork();
-            if (selection != 0) ShowMenuAuthor();
+            if (selection != 0) await ShowMenuAuthor();
         }
 
         public void ShowAllAuthorsLibrary()
@@ -105,7 +103,7 @@ namespace ConsoleAppLearnEFCore.Menu
                             var j = 1;
                             foreach (var authorBook in book.BookAuthors)
                             {
-                                Console.WriteLine($"      {j}. {author.FirstName} {author.LastName} (Id: {authorBook.Id})");
+                                Console.WriteLine($"      {j}. {authorBook.FirstName} {authorBook.LastName} (Id: {authorBook.Id})");
                                 j++;
                             }
                         }
@@ -190,6 +188,7 @@ namespace ConsoleAppLearnEFCore.Menu
             {
                 FormingAuthorForEdit();
                 _serviceLibrary.Update<Author>(_findedAuthor);
+                ShowAuthorLibrary(_findedAuthor);
             }
         }
 
