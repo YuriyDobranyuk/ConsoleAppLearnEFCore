@@ -11,7 +11,7 @@ namespace ConsoleAppLearnEFCore.Model
         public int Id { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public ICollection<Book> BookAuthors { get; set; } = new List<Book>();
+        public List<Book> BookAuthors { get; set; } = new List<Book>();
 
     }
 }

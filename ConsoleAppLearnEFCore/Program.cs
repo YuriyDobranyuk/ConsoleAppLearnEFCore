@@ -1,87 +1,32 @@
-﻿using ConsoleAppLearnEFCore.Model;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using System.Reflection.Emit;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using ConsoleAppLearnEFCore.Interface;
+using ConsoleAppLearnEFCore.Menu;
+using ConsoleAppLearnEFCore.Service;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ConsoleAppLearnEFCore
 {
     public class Program
     {
-        static void Main(string[] args)
+        private static ServiceCollection _services = new();
+        static async Task Main(string[] args)
         {
-            using (ApplicationDbContext db = new ApplicationDbContext())
-            {
-                // наполняем миграцию данными
-                var csharpBook = new Book
-                {
-                    Name = "C# Advanced",
-                    Description = "Book description for C# Advanced",
-                    Pages = 452,
-                    Year = 2019
-                };
+            AddServices();
 
-                var efCoreBook = new Book
-                {
-                    Name = "Entity Framework Core Basic",
-                    Description = "Book description for Entity Framework Core Basic",
-                    Pages = 452,
-                    Year = 2019
-                };
+            var serviceProvider = _services.BuildServiceProvider();
+            var service = serviceProvider.GetService<IServiceLibrary>();
 
-                db.Books.AddRange(csharpBook, efCoreBook);
+            LibraryMenu libraryMenu = new LibraryMenu(service);
+            await libraryMenu.ShowLibraryMenu();
+            
 
-                var johnSmith = new Author
-                {
-                    FirstName = "John",
-                    LastName = "Smith"
-                };
-
-                var arthurMorgan = new Author
-                {
-                    FirstName = "Arthur",
-                    LastName = "Morgan"
-                };
-
-                db.Authors.AddRange(johnSmith, arthurMorgan);
-
-                var sectionClassics = new Section
-                {
-                    Name = "Classics",
-                    Description = "It`s section classic's books."
-                };
-
-                var sectionEducation = new Section
-                {
-                    Name = "Education",
-                    Description = "It`s section education's books."
-                };
-
-                var sectionFantasy = new Section
-                {
-                    Name = "Fantasy",
-                    Description = "It`s section fantasy's books."
-                };
-
-                db.Sections.AddRange(sectionClassics, sectionEducation, sectionFantasy);
-
-                csharpBook.BookAuthors.Add(johnSmith);
-                csharpBook.BookAuthors.Add(arthurMorgan); 
-                csharpBook.BookSections.Add(sectionClassics);
-                csharpBook.BookSections.Add(sectionEducation);
-
-                efCoreBook.BookAuthors.Add(johnSmith);
-                efCoreBook.BookSections.Add(sectionEducation);
-                
-                db.SaveChanges();
-            }
+            Console.ReadLine();
         }
-
-        
+        private static void AddServices()
+        {
+            _services.AddDbContext<ApplicationDbContext>();
+            _services.AddScoped<IServiceLibrary, ServiceLibrary>();
+            
+        }
     }
     
-
-    
-
 }
